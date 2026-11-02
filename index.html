@@ -115,7 +115,15 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 .hud{position:absolute;left:10px;top:10px;right:10px;background:rgba(29,43,79,.88);color:#fff;border-radius:12px;padding:8px 12px;font-size:14px;pointer-events:none}
 .hud b{display:block;font-family:var(--f-display);font-size:17px}
 .joy{position:absolute;left:16px;bottom:16px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.6);touch-action:none}
-.joy i{position:absolute;left:33px;top:33px;width:40px;height:40px;border-radius:50%;background:#ffc65c}
+.joy i{position:absolute;left:33px;top:33px;width:40px;height:40px;border-radius:50%;background:#ffc65c;box-shadow:0 2px 8px #0005}
+.stage:fullscreen{height:100dvh!important;width:100vw!important;border:0;border-radius:0;background:#f0b48a}
+.stage:fullscreen #c3d,.stage:fullscreen #c3d canvas{height:100dvh;width:100vw}
+.game-controls{position:absolute;right:16px;bottom:18px;display:flex;gap:12px;align-items:flex-end}
+.game-btn{width:66px;height:66px;border-radius:50%;border:2px solid #fff;background:rgba(29,43,79,.82);color:#fff;font-weight:800;font-size:14px;box-shadow:0 3px 12px #0005;touch-action:none}
+.game-btn:active{transform:scale(.94);background:#b8860b}
+.stage:fullscreen .game-btn{width:76px;height:76px}
+@media(max-width:600px){.stage{height:70vh;min-height:440px}.joy{width:104px;height:104px}.game-controls{right:12px;bottom:18px}.game-btn{width:62px;height:62px}}
+
 </style>
 </head>
 <body>
@@ -161,7 +169,7 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 </section>
 
 <section class="view" id="v-jelajah" role="tabpanel" aria-labelledby="tab-jelajah" hidden>
-<div id="w3d"><div class="stage"><div id="c3d"></div><div class="hud" id="hud3"></div><div class="joy" id="joy" aria-label="Joystick"><i id="knob"></i></div></div><p class="hint">Gerakkan karakter dengan tombol W A S D atau panah. Di HP, geser joystick kuning di kiri bawah.</p><div class="legend" id="legend3"></div></div>
+<div id="w3d"><div class="stage"><div id="c3d"></div><div class="hud" id="hud3"></div><div class="joy" id="joy" aria-label="Joystick"><i id="knob"></i></div><div class="game-controls"><button class="game-btn" type="button" id="b-jump">LOMPAT</button><button class="game-btn" type="button" id="b-full">⛶ LAYAR</button></div></div><p class="hint">Gerakkan karakter dengan tombol W A S D atau panah. Di HP, geser joystick kuning di kiri bawah.</p><div class="legend" id="legend3"></div></div>
 <div class="actions"><button class="btn" type="button" id="b-home">Ke rumahku</button><button class="btn" type="button" id="b-mode">Lihat peta 2D</button></div>
 <div id="w2d" hidden>
 <div class="mapbar">
@@ -361,50 +369,70 @@ $('d-map').onclick=function(){$('dlg').close();go('jelajah');setTimeout(function
 $('dlg').addEventListener('click',function(e){if(e.target===this)this.close()});
 var chipMe=document.createElement('button');chipMe.type='button';chipMe.className='chip';chipMe.textContent='Rumahku';chipMe.onclick=function(){var m=mine();if(m){state.day=4;syncSeg();selectLM('w'+m.id,true)}};$('legend').insertBefore(chipMe,$('legend').firstChild);
 // ===== kota 3D =====
-var T=window.THREE,T3={on:false,mode:true,ok:false,keys:{},jx:0,jy:0,pos:{x:0,z:0},pts:[],zmax:400},sc,cam,rd,world,ply,mats={};
+var T=window.THREE,T3={on:false,mode:true,ok:false,keys:{},jx:0,jy:0,jump:0,jv:0,pos:{x:0,z:0},pts:[],zmax:400},sc,cam,rd,world,ply,mats={};
 var LP={markas:[0,-16],roket:[-18,-8],sawit:[32,-12],kopdes:[22,-4],avengers:[-38,-24],bandara:[46,26],minimarket:[-24,14],pos:[-24,26],tenda:[-48,-8]},LN={markas:'Markas',roket:'Roket Pertama',sawit:'Kebun Sawit',kopdes:'Kopdes',avengers:'Gedung Avengers',bandara:'Bandara Mini',minimarket:'Minimarket',pos:'Pos Pajak',tenda:'Tenda Darurat'},LH={markas:9,roket:15,sawit:8,kopdes:7,avengers:27,bandara:8,minimarket:8,pos:7,tenda:6};
 var GB,GC,GS,GP,GE;if(T){GB=new T.BoxGeometry(1,1,1);GC=new T.CylinderGeometry(.9,.9,2.2,12);GS=new T.SphereGeometry(.9,12,8);GP=new T.ConeGeometry(1,1,4);GE=new T.SphereGeometry(.4,8,6)}
 function M(c){return mats[c]||(mats[c]=new T.MeshLambertMaterial({color:c}))}
 function mesh(g,c,x,y,z,p,sx,sy,sz){var m=new T.Mesh(g,M(c));m.position.set(x,y,z);if(sx)m.scale.set(sx,sy,sz);p.add(m);return m}
 function bx(w,h,d,c,x,y,z,p){return mesh(GB,c,x,y,z,p,w,h,d)}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function chr(w,a){var g=new T.Group(),c=COL[w%8];a=a%4;mesh(GC,c,0,2,0,g);mesh(GS,c,0,3.1,0,g);mesh(GS,c,0,.9,0,g);mesh(GC,BELT[a],0,1.5,0,g,1.06,.12,1.06);mesh(GE,'#ffffff',0,3.2,.55,g,1.2,1.2,1.2);mesh(GE,'#23262b',0,3.2,.95,g,.5,.5,.5);
+function chr(w,a){var g=new T.Group(),c=COL[w%8];a=a%4;mesh(GC,c,0,2,0,g);mesh(GS,c,0,3.1,0,g);mesh(GS,c,0,.9,0,g);mesh(GC,BELT[a],0,1.5,0,g,1.06,.12,1.06);mesh(GE,'#ffffff',-.23,3.25,.88,g,.48,.58,.24);mesh(GE,'#ffffff',.23,3.25,.88,g,.48,.58,.24);mesh(GE,'#23262b',-.23,3.25,1.08,g,.19,.28,.12);mesh(GE,'#23262b',.23,3.25,1.08,g,.19,.28,.12);var limbs=[];[-1,1].forEach(function(side){var arm=new T.Group();arm.position.set(side*.82,2.05,0);mesh(new T.CylinderGeometry(.13,.12,.95,10),c,0,-.38,0,arm);mesh(GE,'#23262b',0,-.87,.03,arm,.2,.16,.2);g.add(arm);limbs.push(arm);var leg=new T.Group();leg.position.set(side*.34,.28,0);mesh(new T.CylinderGeometry(.13,.14,.52,10),'#23262b',0,-.12,0,leg);g.add(leg);limbs.push(leg)});g.userData.limbs=limbs;
 if(a===0){mesh(GC,'#23262b',0,4.6,0,g,.07,.55,.07);mesh(GE,'#ffe27a',0,5.3,0,g,.8,.8,.8)}
 if(a===1)[-.4,0,.4].forEach(function(x){mesh(GC,'#23262b',x,4.2,0,g,.06,.4,.06)});
 if(a===2)mesh(GP,'#ff7eb6',0,4.8,0,g,.9,1.7,.9);
 if(a===3)mesh(GP,'#fff1c9',.4,4.4,0,g,.3,1,.3);return g}
 function lab(t,col){var c=document.createElement('canvas');c.width=320;c.height=72;var x=c.getContext('2d');x.fillStyle=col||'rgba(29,43,79,.88)';x.beginPath();if(x.roundRect)x.roundRect(4,4,312,64,22);else x.rect(4,4,312,64);x.fill();x.fillStyle='#fff';x.font='600 30px Fredoka,Trebuchet MS,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(t.length>18?t.slice(0,17)+'…':t,160,38);var s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),transparent:true}));s.scale.set(8,1.8,1);return s}
 function build3D(){if(!T||!sc)return;var sig=WARGA.map(function(w){return w.user+'|'+w.prof+'|'+w.warna+w.acc}).join(',')+(me?me.user+me.warna+'-'+me.acc:'');if(sig===T3.sig)return;T3.sig=sig;
-if(world){sc.remove(world);world.traverse(function(o){if(o.material&&o.material.map)o.material.map.dispose()})}
-world=new T.Group();sc.add(world);T3.pts=[];var tot=Math.max(49,19+WARGA.length),zmax=8+Math.ceil(tot/2)*7;T3.zmax=zmax;
-var gr=new T.Mesh(new T.PlaneGeometry(700,zmax+500),M('#b9532f'));gr.rotation.x=-Math.PI/2;gr.position.z=zmax/2;world.add(gr);bx(8,.2,zmax+50,'#6e3b2d',0,.1,zmax/2,world);
+if(world){sc.remove(world);world.traverse(function(o){if(o.geometry&&o.geometry.dispose)o.geometry.dispose();if(o.material&&o.material.map)o.material.map.dispose()})}
+world=new T.Group();sc.add(world);T3.pts=[];T3.zmax=120;
+// Terrain and Mars hills inspired by the Hari 4 animation
+function smooth(a,b,v){var u=clamp((v-a)/(b-a),0,1);return u*u*(3-2*u)}
+function hill(x,z){var edge=Math.max(smooth(34,75,Math.abs(x)),smooth(34,75,z),smooth(70,105,-z));return edge*(5+10*(Math.sin(x*.09+1)*Math.cos(z*.1)*.5+.5)+3*Math.sin(x*.22)*Math.cos(z*.2))}
+var geo=new T.PlaneGeometry(210,210,70,70);geo.rotateX(-Math.PI/2);var pos=geo.attributes.position,cols=[];
+for(var v=0;v<pos.count;v++){var xx=pos.getX(v),zz=pos.getZ(v),hh=hill(xx,zz),j=.9+Math.random()*.1;pos.setY(v,hh);var rock= Math.sin(xx*.14)*Math.cos(zz*.13)>.72&&hh>.5;cols.push(rock?.43*j:.76*j,rock?.25*j:.37*j,rock?.18*j:.22*j)}
+geo.setAttribute('color',new T.Float32BufferAttribute(cols,3));geo.computeVertexNormals();var ground=new T.Mesh(geo,new T.MeshLambertMaterial({vertexColors:true}));ground.position.y=0;ground.receiveShadow=true;world.add(ground);
+// Dusty rocks scattered along the edge of the settlement
 var sd0=7;function rnd(){sd0=sd0*16807%2147483647;return sd0/2147483647}
-for(var i=0;i<40+zmax/8;i++){var cx=(rnd()-.5)*180,cz=-70+rnd()*(zmax+120);if(Math.abs(cx)<8)continue;if(i%3){var rk=mesh(new T.IcosahedronGeometry(1,0),'#8f4a30',cx,.6,cz,world,1+rnd()*2,.8+rnd(),1+rnd()*2);rk.rotation.y=rnd()*6}else mesh(new T.CylinderGeometry(1,1,.1,14),'#8a3b25',cx,.06,cz,world,3+rnd()*4,1,3+rnd()*4)}
-for(var k=0;k<tot;k++){var sd=k%2?1:-1,x=sd*10,z=8+Math.floor(k/2)*7,w=k>=19?WARGA[k-19]:null;
-if(k>=19&&!w){bx(5,.15,5,'#c9784f',x,.08,z,world);continue}
-var h=new T.Group();h.position.set(x,0,z);bx(5,3,5,'#f1e7da',0,1.5,0,h);var ro=mesh(GP,w?COL[w.warna%8]:'#c2452d',0,4.2,0,h,3.9,2.4,3.9);ro.rotation.y=Math.PI/4;bx(.2,2,1.1,'#6b4423',-sd*2.55,1,0,h);
-if(w){var l=lab(w.mine?'Rumahku':'@'+w.user,w.mine?'#b8860b':null);l.position.y=7.8;h.add(l);if(!w.mine){var c=chr(w.warna,w.acc);c.scale.setScalar(.6);c.position.set(-sd*4.4,0,0);c.rotation.y=-sd*Math.PI/2;h.add(c)}else{var rg=new T.Mesh(new T.RingGeometry(3.4,4,28),M('#ffc65c'));rg.rotation.x=-Math.PI/2;rg.position.y=.15;h.add(rg)}T3.pts.push({x:x,z:z,r:3,kind:'w',id:w.id})}
-world.add(h)}
-LM.forEach(function(m){var p=LP[m.id],g=new T.Group(),i;g.position.set(p[0],0,p[1]);
-if(m.id==='markas'){bx(14,5,9,'#d7263d',0,2.5,0,g);var d=new T.Mesh(new T.SphereGeometry(4.5,14,8,0,6.3,0,1.57),new T.MeshLambertMaterial({color:0x9fe6ff,transparent:true,opacity:.7}));d.position.y=5;g.add(d)}
-if(m.id==='roket'){mesh(new T.CylinderGeometry(1.6,1.6,9,12),'#f4f4f4',0,4.5,0,g);mesh(new T.ConeGeometry(1.6,3.5,12),'#d7263d',0,10.7,0,g);[-1,1].forEach(function(s){bx(.4,3,2.4,'#d7263d',s*1.8,1.5,0,g)})}
-if(m.id==='sawit')for(i=0;i<20;i++){var dead=true,tx=(i%5)*3,tz=Math.floor(i/5)*3;bx(.5,2,.5,'#5a3a1a',tx,1,tz,g);mesh(GS,dead?'#7a5a2a':'#3fae5a',tx,2.8,tz,g,1.3,1.3,1.3)}
-if(m.id==='kopdes'){bx(8,4,6,'#f4f4f4',0,2,0,g);bx(9,1,7,'#d7263d',0,4.5,0,g)}
-if(m.id==='avengers'){bx(6,22,6,'#34487c',0,11,0,g);var tr=new T.Mesh(new T.TorusGeometry(3.4,.5,8,22),M('#ffc65c'));tr.position.set(0,23.5,0);g.add(tr)}
-if(m.id==='bandara'){mesh(new T.CylinderGeometry(10,10,.2,24),'#7b8088',0,.1,0,g);bx(8,3,4,'#e8e2da',-12,1.5,-8,g)}
-if(m.id==='minimarket'){bx(8,4,6,'#f4f4f4',0,2,0,g);bx(9,1,7,'#2d6cdf',0,4.5,0,g)}
-if(m.id==='pos'){bx(4,3,3,'#f2c14e',0,1.5,0,g);bx(5,.8,4,'#d7263d',0,3.4,0,g)}
-if(m.id==='tenda'){var cs=['#ff9a3c','#4aa8ff','#ff6b9a','#7bd88f','#ffe27a'];for(i=0;i<45;i++)mesh(GP,cs[i%5],(i%9)*3.2-12,1,Math.floor(i/9)*3.2-6,g,1.6,2,1.6)}
-var lb=lab(LN[m.id]);lb.position.y=LH[m.id];g.add(lb);world.add(g);T3.pts.push({x:p[0],z:p[1],r:m.id==='tenda'?16:m.id==='bandara'?10:8,kind:'l',id:m.id})});
+for(var r=0;r<130;r++){var rx=(rnd()<.5?-1:1)*(24+rnd()*65),rz=42-rnd()*115;if(Math.abs(rx)<12&&rz>-58&&rz<35)continue;var rock=mesh(new T.IcosahedronGeometry(1,0),r%3?'#87462d':'#a35a36',rx,hill(rx,rz)+.35,rz,world,.5+rnd()*2,.4+rnd()*1.2,.5+rnd()*2);rock.rotation.y=rnd()*6}
+// Main dusty road and village lane
+bx(5,.12,150,'#67402f',0,.08,-28,world);bx(2,.04,145,'#8a5940',0,.16,-28,world);
+// Houses in the Hari 4 capsule-village style
+var houseCols=['#f2e2c4','#f2c14e','#e8dcc8','#f4f4f4','#c9e7e0','#f5c9b8','#d9d2f0','#f8e0a8'];
+function house(x,z,i,label){var g=new T.Group();g.position.set(x,hill(x,z),z);g.rotation.y=x>0?Math.PI/2:-Math.PI/2;bx(5.2,3.2,4.4,houseCols[i%8],0,1.6,0,g);var roof=mesh(new T.ConeGeometry(4.2,2.2,4),'#c2452d',0,4.25,0,g);roof.rotation.y=Math.PI/4;bx(1,1.7,.12,'#6b4423',0,.85,2.25,g);bx(.75,.75,.1,'#6ad6ff',-1.55,1.8,2.25,g);bx(.75,.75,.1,'#6ad6ff',1.55,1.8,2.25,g);if(label){var tag=lab(label);tag.position.set(0,6.3,0);g.add(tag)}world.add(g);return g}
+// Landmark helpers
+function labelAt(text,x,y,z){var l=lab(text);l.position.set(x,y,z);world.add(l)}
+function tree(x,z){var g=new T.Group();g.position.set(x,hill(x,z),z);mesh(new T.CylinderGeometry(.22,.32,3,7),'#6b4423',0,1.5,0,g);for(var f=0;f<6;f++){var fr=new T.Group();fr.position.y=2.8;fr.rotation.y=f*Math.PI/3;var leaf=bx(2.7,.12,.65,'#3fae5a',1.1,0,0,fr);leaf.rotation.z=-.28;g.add(fr)}world.add(g)}
+for(var tr=0;tr<20;tr++)tree(25+(tr%5)*3.2, -14+Math.floor(tr/5)*3.4);
+// Kopdes
+var kp=new T.Group();kp.position.set(19,hill(19,-10),-10);bx(7,3.3,5,'#f4f4f4',0,1.65,0,kp);bx(7.6,.6,5.5,'#d7263d',0,3.55,0,kp);bx(1,1.9,.12,'#6b4423',0,.95,2.55,kp);labelAt('KOPDES',19,6,-10);world.add(kp);T3.pts.push({x:19,z:-10,r:8,kind:'l',id:'kopdes'});
+// Avengers tower
+var av=new T.Group();av.position.set(-37,hill(-37,-25),-25);bx(9,1,9,'#6c7480',0,.5,0,av);bx(5.5,24,5.5,'#34487c',0,12,0,av);for(var fl=1;fl<8;fl++)bx(5.7,.25,5.7,'#9fe6ff',0,fl*3,0,av);var ring=new T.Mesh(new T.TorusGeometry(3,.3,8,24),M('#ffc65c'));ring.position.y=25.5;av.add(ring);world.add(av);labelAt('GEDUNG AVENGERS',-37,29,-25);T3.pts.push({x:-37,z:-25,r:9,kind:'l',id:'avengers'});
+// Rocket and mini airport
+var rocket=new T.Group();rocket.position.set(-18,hill(-18,-8),-8);mesh(new T.CylinderGeometry(1.2,1.35,7,12),'#f4f4f4',0,3.5,0,rocket);mesh(new T.ConeGeometry(1.2,2.6,12),'#d7263d',0,8.3,0,rocket);mesh(new T.SphereGeometry(.55,12,8),'#6ad6ff',0,4.7,1,rocket);[-1,1].forEach(function(q){bx(.3,2,1.8,'#d7263d',q*1.4,1.2,0,rocket)});world.add(rocket);labelAt('ROKET MARS',-18,12,-8);T3.pts.push({x:-18,z:-8,r:7,kind:'l',id:'roket'});
+var airport=new T.Group();airport.position.set(46,hill(46,26),26);var pad=new T.Mesh(new T.CylinderGeometry(10,10,.25,32),M('#7b8088'));pad.position.y=.13;airport.add(pad);bx(8,3,5,'#e8e2da',-12,1.5,-8,airport);world.add(airport);labelAt('BANDARA MINI',46,8,26);T3.pts.push({x:46,z:26,r:11,kind:'l',id:'bandara'});
+// Minimarket and tax post
+var shop=new T.Group();shop.position.set(-24,hill(-24,14),14);bx(8,4,6,'#f4f4f4',0,2,0,shop);bx(8.5,.8,6.5,'#2d6cdf',0,4.4,0,shop);world.add(shop);labelAt('MINIMARKET',-24,8,14);T3.pts.push({x:-24,z:14,r:8,kind:'l',id:'minimarket'});
+var tax=new T.Group();tax.position.set(-24,hill(-24,26),26);bx(4,3,3,'#f2c14e',0,1.5,0,tax);bx(5,.7,4,'#d7263d',0,3.35,0,tax);world.add(tax);labelAt('POS PAJAK',-24,7,26);T3.pts.push({x:-24,z:26,r:7,kind:'l',id:'pos'});
+// Emergency camp: 45 colorful tents, laid out in rows
+var tentCols=['#ff9a3c','#4aa8ff','#ff6b9a','#7bd88f','#ffe27a'];var camp=new T.Group();camp.position.set(-48,hill(-48,-8),-8);for(var ti=0;ti<45;ti++){var tx=(ti%9)*3.2-12,tz=Math.floor(ti/9)*3.2-6;var tent=mesh(GP,tentCols[ti%5],tx,1,tz,camp,1.6,2,1.6);tent.rotation.y=Math.PI/4}world.add(camp);labelAt('45 TENDA WARGA BARU',-48,7,-8);T3.pts.push({x:-48,z:-8,r:17,kind:'l',id:'tenda'});
+// Resident homes and capsule residents, tied to actual registration data
+var total=Math.max(19,WARGA.length),homePts=[];for(var wi=0;wi<total;wi++){var sd=wi%2?1:-1,hx=sd*8,hz=-9-Math.floor(wi/2)*6.2;homePts.push([hx,hz]);var w=wi<WARGA.length?WARGA[wi]:null;house(hx,hz,wi,w?(w.mine?'Rumahku':'@'+w.user):'');if(w){var hg=null;var resident=chr(w.warna,w.acc);resident.scale.setScalar(.72);resident.position.set(hx+(sd>0?4.4:-4.4),hill(hx,hz),hz);resident.rotation.y=sd>0?Math.PI/2:-Math.PI/2;world.add(resident);T3.pts.push({x:hx,z:hz,r:4,kind:'w',id:w.id})}}
+// River channel with visible water, matching the Hari 4 layout
+var river=new T.Group();river.position.set(-17,.18,8);var water=new T.Mesh(new T.PlaneGeometry(4.6,130),new T.MeshLambertMaterial({color:0x4aa8ff}));water.rotation.x=-Math.PI/2;water.position.z=-65;river.add(water);[-2.8,2.8].forEach(function(q){bx(.6,.35,130,'#8f3d24',q,.17,-65,river)});world.add(river);labelAt('SUNGAI MARS',-17,4,6);
+// Main base / presidential plaza
+var base=new T.Group();base.position.set(0,hill(0,-16),-16);bx(14,4,9,'#d7263d',0,2,0,base);var dome=new T.Mesh(new T.SphereGeometry(4.5,18,12,0,Math.PI*2,0,Math.PI/2),new T.MeshLambertMaterial({color:0x9fe6ff,transparent:true,opacity:.72}));dome.position.y=4;base.add(dome);world.add(base);labelAt('MARKAS MARS CITY',0,11,-16);T3.pts.push({x:0,z:-16,r:10,kind:'l',id:'markas'});
+// Decorative capsule people moving around the settlement
+T3.citizens=[];for(var ci=0;ci<Math.min(12,WARGA.length);ci++){var ww=WARGA[ci],npc=chr(ww.warna,ww.acc);npc.scale.setScalar(.55);npc.position.set((ci%4-1.5)*5,0,-32-Math.floor(ci/4)*7);world.add(npc);T3.citizens.push({o:npc,a:ci*.9,r:2.5+ci%3})}
 if(ply)sc.remove(ply);ply=chr(me?me.warna:0,me?me.acc:0);ply.scale.setScalar(.75);if(me){var pl=lab('@'+me.user,'#1b8f83');pl.position.y=6.6;ply.add(pl)}sc.add(ply)}
 function tp3D(id){var o=T3.pts.filter(function(p){return String(p.id)===String(id)})[0];if(!o)return;T3.pos.x=o.kind==='w'?(o.x>0?5.2:-5.2):o.x;T3.pos.z=o.z+(o.kind==='w'?0:o.r*.8)}
 function hud(p){var h=$('hud3');if(!p){h.innerHTML='<b>Mars City</b>Jalan ke rumah warga atau bangunan untuk melihat ceritanya.';return}
 if(p.kind==='w'){var w=WARGA[p.id];h.innerHTML='<b>'+esc(w.user)+'</b>'+esc(w.prof)+(w.lencana?' • '+esc(w.lencana):'')+' • '+esc(w.no)}else{var m=LM.filter(function(x){return x.id===p.id})[0];h.innerHTML='<b>'+esc(m.n)+'</b>'+esc(m.t)}}
 function rsz(){if(!rd)return;var b=$('c3d');rd.setSize(b.clientWidth,b.clientHeight);cam.aspect=b.clientWidth/Math.max(1,b.clientHeight);cam.updateProjectionMatrix()}
-function loop(t){requestAnimationFrame(loop);if(!T3.on||$('v-jelajah').hidden||!rd)return;var dt=Math.min(.05,(t-(T3.t||t))/1000);T3.t=t;
+function loop(t){requestAnimationFrame(loop);if(!T3.on||$('v-jelajah').hidden||!rd)return;if(world&&T3.citizens){T3.citizens.forEach(function(n,i){var q=n.a+t*.00035;n.o.position.x=Math.cos(q)*n.r+(i%4-1.5)*5;n.o.position.z=-32-Math.floor(i/4)*7+Math.sin(q)*n.r;n.o.rotation.y=q+Math.PI/2;n.o.position.y=Math.abs(Math.sin(t*.003+i))*.12})}var dt=Math.min(.05,(t-(T3.t||t))/1000);T3.t=t;
 var k=T3.keys,dx=(k.arrowright||k.d?1:0)-(k.arrowleft||k.a?1:0)+T3.jx,dz=(k.arrowdown||k.s?1:0)-(k.arrowup||k.w?1:0)+T3.jy,l=Math.hypot(dx,dz),mv=l>.1;
 if(mv){if(l>1){dx/=l;dz/=l}T3.pos.x=clamp(T3.pos.x+dx*16*dt,-90,90);T3.pos.z=clamp(T3.pos.z+dz*16*dt,-60,T3.zmax+40);ply.rotation.y=Math.atan2(dx,dz);T3.walk=(T3.walk||0)+dt*12}
-ply.position.set(T3.pos.x,mv?Math.abs(Math.sin(T3.walk))*.5:0,T3.pos.z);cam.position.set(T3.pos.x,16,T3.pos.z+20);cam.lookAt(T3.pos.x,2,T3.pos.z);
+if(T3.jump>0){T3.jump+=T3.jv*dt;T3.jv-=22*dt;if(T3.jump<=0){T3.jump=0;T3.jv=0}}
+var bob=mv?Math.abs(Math.sin(T3.walk))*.22:Math.sin(t*.002)*.035;ply.position.set(T3.pos.x,T3.jump+bob,T3.pos.z);if(ply.userData.limbs){ply.userData.limbs.forEach(function(a,i){a.rotation.z=mv?Math.sin(T3.walk+(i%2)*Math.PI)*.65:Math.sin(t*.002+i)*.035})}cam.position.set(T3.pos.x,16,T3.pos.z+20);cam.lookAt(T3.pos.x,2,T3.pos.z);
 var best=null,bd=1e9;T3.pts.forEach(function(p){var d=Math.hypot(p.x-T3.pos.x,p.z-T3.pos.z)-p.r;if(d<bd){bd=d;best=p}});var key=bd<4?best.id:'';if(key!==T3.near){T3.near=key;hud(bd<4?best:null)}
 rd.render(sc,cam)}
 function init3D(){if(!T)return false;if(T3.ok)return true;try{rd=new T.WebGLRenderer({antialias:true});rd.setPixelRatio(Math.min(devicePixelRatio||1,2));$('c3d').appendChild(rd.domElement);sc=new T.Scene();sc.background=new T.Color(0xf0b48a);sc.fog=new T.Fog(0xf0b48a,60,170);cam=new T.PerspectiveCamera(50,1,.5,400);sc.add(new T.HemisphereLight(0xffe9d6,0x7d3320,.9));var dl=new T.DirectionalLight(0xffffff,.55);dl.position.set(20,40,10);sc.add(dl);T3.ok=true;rsz();build3D();var m=mine();if(m)tp3D(m.id);requestAnimationFrame(loop)}catch(e){T3.ok=false}return T3.ok}
@@ -417,6 +445,10 @@ addEventListener('keyup',function(e){delete T3.keys[e.key.toLowerCase()]});addEv
 var joy=$('joy'),kn=$('knob');function jm(e){var r=joy.getBoundingClientRect(),x=(e.clientX-r.left-55)/45,y=(e.clientY-r.top-55)/45,l=Math.hypot(x,y);if(l>1){x/=l;y/=l}T3.jx=x;T3.jy=y;kn.style.transform='translate('+x*30+'px,'+y*30+'px)'}
 function jend(){T3.jx=T3.jy=0;kn.style.transform=''}
 joy.addEventListener('pointerdown',function(e){joy.setPointerCapture(e.pointerId);jm(e)});joy.addEventListener('pointermove',function(e){if(e.buttons)jm(e)});joy.addEventListener('pointerup',jend);joy.addEventListener('pointercancel',jend);
+function jumpStart(){if(T3.jump===0){T3.jv=8.5;T3.jump=.01}}
+$('b-jump').addEventListener('pointerdown',function(e){e.preventDefault();jumpStart()});
+$('b-full').onclick=function(){var el=$('w3d').querySelector('.stage');if(!document.fullscreenElement){if(el.requestFullscreen)el.requestFullscreen().then(rsz).catch(function(){toast('Mode layar penuh tidak tersedia di browser ini.')})}else if(document.exitFullscreen)document.exitFullscreen()};
+document.addEventListener('fullscreenchange',function(){ $('b-full').textContent=document.fullscreenElement?'✕ KELUAR':'⛶ LAYAR';setTimeout(rsz,100)});
 // ===== menu =====
 var VIEWS=['daftar','jelajah'];
 function go(v,push){if(VIEWS.indexOf(v)<0)v='daftar';if(v==='jelajah'&&!me){toast('Daftar dulu supaya bisa menjelajahi kota.');v='daftar'}
