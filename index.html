@@ -233,7 +233,7 @@ var CFG={
 // ===== MULTIPLAYER OPEN WORLD (Supabase Realtime) =====
 // Buat project Supabase, lalu isi URL dan anon key di bawah.
 // Jangan pernah menaruh service_role key di website publik.
-var MP={url:'',anonKey:'',room:'mars-city-open-world'};
+var MP={url:'https://ohglbshzlruiufinfsrb.supabase.co',anonKey:'sb_publishable_a7jVg08t0HOtuyP0Kamsfg_pLwWw7qe',room:'mars-city-open-world'};
 var mpClient=null,mpChannel=null,mpSession='',mpLastSend=0,mpOnline={},remotePlayers={},worldBuilds=[],roadMeshes=[];
 var episodeWorld={episode:4,title:'Mars City Hari 4',objects:[]},episodeMeshes=[];
 function mpStatus(msg,online){var el=$('mp-status');if(!el)return;el.textContent=msg;el.className='mp-status '+(online?'online':'offline')}
