@@ -114,6 +114,16 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 #c3d,#c3d canvas{width:100%;height:100%;display:block;touch-action:none}
 .hud{position:absolute;left:10px;top:10px;right:10px;background:rgba(29,43,79,.88);color:#fff;border-radius:12px;padding:8px 12px;font-size:14px;pointer-events:none}
 .hud b{display:block;font-family:var(--f-display);font-size:17px}
+
+.mp-status{position:absolute;top:84px;left:10px;z-index:3;padding:6px 10px;border-radius:999px;background:rgba(24,35,53,.86);color:#fff;font-size:12px;font-weight:700;pointer-events:none}
+.mp-status.online{background:rgba(20,116,75,.92)}
+.mp-status.offline{background:rgba(125,65,30,.92)}
+.world-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.world-tools .chip{font-weight:800}
+.chatbox{margin:12px 0;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.chatlog{height:170px;overflow:auto;background:var(--surface2);border-radius:10px;padding:9px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.chatline{overflow-wrap:anywhere}.chatline b{color:var(--teal)}.chatform{display:flex;gap:7px;margin-top:8px}.chatform input{min-width:0;flex:1}.build-note{font-size:12px;color:var(--sub);margin:5px 0 0}
+.stage:fullscreen .chatbox{display:none}
+.episode-panel{margin:12px 0;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}.episode-panel textarea{width:100%;min-height:145px;font:12px/1.5 ui-monospace,monospace;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--text)}.episode-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.episode-note{font-size:12px;color:var(--sub);margin:6px 0}
 .joy{position:absolute;left:16px;bottom:16px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.6);touch-action:none}
 .joy i{position:absolute;left:33px;top:33px;width:40px;height:40px;border-radius:50%;background:#ffc65c;box-shadow:0 2px 8px #0005}
 .stage:fullscreen{height:100dvh!important;width:100vw!important;border:0;border-radius:0;background:#f0b48a}
@@ -123,6 +133,13 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 .game-btn:active{transform:scale(.94);background:#b8860b}
 .stage:fullscreen .game-btn{width:76px;height:76px}
 @media(max-width:600px){.stage{height:70vh;min-height:440px}.joy{width:104px;height:104px}.game-controls{right:12px;bottom:18px}.game-btn{width:62px;height:62px}}
+.animator{margin-top:12px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.anim-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.anim-head b{font-family:var(--f-display)}
+.anim-actions{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.anim-actions .chip[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.speed-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-top:8px}.animator input[type=range]{width:100%;accent-color:var(--teal)}
+.rotate-tip{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(80%,360px);padding:14px;border-radius:14px;background:#17213ddd;color:#fff;text-align:center;font-weight:700;z-index:5;pointer-events:none}
+@media(orientation:portrait){.stage:fullscreen .rotate-tip{display:block}}
+.stage:fullscreen .hud{max-width:360px}.stage:fullscreen .joy{width:128px;height:128px}.stage:fullscreen .joy i{left:40px;top:40px;width:44px;height:44px}
 
 </style>
 </head>
@@ -169,7 +186,13 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 </section>
 
 <section class="view" id="v-jelajah" role="tabpanel" aria-labelledby="tab-jelajah" hidden>
-<div id="w3d"><div class="stage"><div id="c3d"></div><div class="hud" id="hud3"></div><div class="joy" id="joy" aria-label="Joystick"><i id="knob"></i></div><div class="game-controls"><button class="game-btn" type="button" id="b-jump">LOMPAT</button><button class="game-btn" type="button" id="b-full">⛶ LAYAR</button></div></div><p class="hint">Gerakkan karakter dengan tombol W A S D atau panah. Di HP, geser joystick kuning di kiri bawah.</p><div class="legend" id="legend3"></div></div>
+<div id="w3d"><div class="stage"><div id="c3d"></div><div class="hud" id="hud3"></div><div id="mp-status" class="mp-status">🌐 Multiplayer belum dikonfigurasi</div><div class="joy" id="joy" aria-label="Joystick"><i id="knob"></i></div><div class="game-controls"><button class="game-btn" type="button" id="b-jump">LOMPAT</button><button class="game-btn" type="button" id="b-full">⛶ LAYAR</button></div><div class="rotate-tip" id="rotate-tip">Putar HP ke posisi mendatar untuk pengalaman seperti game.</div></div><div class="world-tools"><button class="chip" type="button" id="b-build-road">🛣️ Bangun jalan</button><button class="chip" type="button" id="b-build-clear">Hapus pilihan jalan</button></div><p class="build-note">Bangun jalan di dekat posisi karaktermu. Jalan yang disimpan akan terlihat oleh semua pemain di kota ini.</p><details class="episode-panel"><summary><b>🏗️ Update Kota dari Episode Konten</b></summary><p class="episode-note">Masukkan JSON pembangunan yang dibuat dari episode animasi terbaru. Pratinjau diterapkan di browser ini, lalu unduh <b>marscity-world.json</b> dan unggah ke repositori GitHub agar semua pemain melihat kota terbaru.</p><textarea id="episode-json" spellcheck="false" aria-label="Data pembangunan episode">{
+  "episode": 5,
+  "title": "Mars City Day 5",
+  "objects": [
+    {"id":"day5-main-road","type":"road","name":"Jalan Raya Baru","x":0,"z":35,"length":42,"width":6,"color":"#62564f"}
+  ]
+}</textarea><div class="episode-actions"><button class="btn" type="button" id="b-episode-preview">Pratinjau</button><button class="btn pri" type="button" id="b-episode-apply">Update Kota</button><button class="btn" type="button" id="b-episode-download">Unduh JSON</button></div><p class="episode-note" id="episode-status">Format didukung: road, house, tree, building, rocket, plaza. Maksimal 100 objek per episode.</p></details><div class="chatbox"><b>💬 Chat warga Mars City</b><div id="chat-log" class="chatlog" aria-live="polite"><div>Hubungkan multiplayer untuk mulai mengobrol.</div></div><form id="chat-form" class="chatform"><input id="chat-input" maxlength="180" placeholder="Tulis pesan untuk warga…" autocomplete="off"><button class="btn pri" type="submit">Kirim</button></form></div><p class="hint">Gerakkan karakter dengan tombol W A S D atau panah. Di HP, geser joystick kiri bawah.</p><div class="animator" id="animator"><div class="anim-head"><b>🎬 GAME ANIMATOR — GERAKAN PICO</b><button class="chip" type="button" id="b-sound" aria-pressed="true">🔊 Suara aktif</button></div><div class="anim-actions"><button class="chip" type="button" data-anim="idle">Diam</button><button class="chip" type="button" data-anim="wave">Melambaikan tangan</button><button class="chip" type="button" data-anim="dance">Menari</button><button class="chip" type="button" data-anim="cheer">Senang</button><button class="chip" type="button" data-anim="run">Lari</button></div><label class="speed-label" for="anim-speed">Kecepatan animasi <output id="speed-val">1.0×</output></label><input id="anim-speed" type="range" min="0.5" max="2" step="0.1" value="1"></div><div class="legend" id="legend3"></div></div>
 <div class="actions"><button class="btn" type="button" id="b-home">Ke rumahku</button><button class="btn" type="button" id="b-mode">Lihat peta 2D</button></div>
 <div id="w2d" hidden>
 <div class="mapbar">
@@ -190,6 +213,7 @@ nav.tabs small{font-family:var(--f-body);font-size:12px;color:var(--sub);margin-
 <dialog id="dlg" aria-label="Kartu warga"><div class="card" id="dcard"></div><div class="actions"><button class="btn" type="button" id="d-map">Lihat di peta</button><button class="btn pri" type="button" id="d-close">Tutup</button></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
 (function(){
@@ -206,6 +230,54 @@ var CFG={
  prefill:'',  // tempel LINK ISI OTOMATIS dari Google Form (isinya AAA, BBB, CCC, DDD, EEE)
  sheetCsv:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQLC4vEeSUPcCdygD_f36bhKoOKWXXU6Q7vAUxZB0sPXJxuHt0AuKuOMe8M0xE5hknjOST_EiztCnX4/pub?gid=2004462795&single=true&output=csv'  // database warga Mars City
 };
+// ===== MULTIPLAYER OPEN WORLD (Supabase Realtime) =====
+// Buat project Supabase, lalu isi URL dan anon key di bawah.
+// Jangan pernah menaruh service_role key di website publik.
+var MP={url:'',anonKey:'',room:'mars-city-open-world'};
+var mpClient=null,mpChannel=null,mpSession='',mpLastSend=0,mpOnline={},remotePlayers={},worldBuilds=[],roadMeshes=[];
+var episodeWorld={episode:4,title:'Mars City Hari 4',objects:[]},episodeMeshes=[];
+function mpStatus(msg,online){var el=$('mp-status');if(!el)return;el.textContent=msg;el.className='mp-status '+(online?'online':'offline')}
+function mpSessionId(){try{return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():'mc-'+Date.now().toString(36)+Math.random().toString(36).slice(2)}catch(e){return 'mc-'+Date.now().toString(36)}}
+function mpAddOrUpdate(data,key){
+ if(!data||!data.sessionId||data.sessionId===mpSession||!sc)return;
+ var id=String(data.sessionId),r=remotePlayers[id];
+ if(!r){var avatar=chr((+data.warna||0)%8,(+data.acc||0)%4);avatar.scale.setScalar(.75);var tag=lab('@'+clean(data.user||'Warga',24),'#1b8f83');tag.position.y=6.7;avatar.add(tag);sc.add(avatar);r=remotePlayers[id]={o:avatar,x:+data.x||0,z:+data.z||0,tx:+data.x||0,tz:+data.z||0,rot:+data.rot||0,user:clean(data.user||'Warga',24),last:Date.now()};}
+ r.tx=clamp(+data.x||0,-90,90);r.tz=clamp(+data.z||0,-60,160);r.rot=+data.rot||0;r.last=Date.now();
+}
+function mpRemoveMissing(active){Object.keys(remotePlayers).forEach(function(id){if(!active[id]){if(sc)sc.remove(remotePlayers[id].o);delete remotePlayers[id]}})}
+function mpPresenceSync(){
+ if(!mpChannel)return;var state=mpChannel.presenceState(),active={};
+ Object.keys(state).forEach(function(k){(state[k]||[]).forEach(function(v){if(v&&v.sessionId&&v.sessionId!==mpSession){active[v.sessionId]=true;mpAddOrUpdate(v,v.sessionId)}})});
+ mpRemoveMissing(active);mpOnline=active;mpUpdateCount();
+}
+function mpUpdateCount(){var n=Object.keys(mpOnline).length+1;mpStatus('🌐 '+n+' warga di kota ini',true)}
+async function initMultiplayer(){
+ if(!MP.url||!MP.anonKey){mpStatus('🌐 Multiplayer perlu URL + anon key Supabase',false);return}
+ if(!window.supabase||!window.supabase.createClient){mpStatus('🌐 Library multiplayer gagal dimuat',false);return}
+ if(!me){mpStatus('🌐 Daftar / buka akun warga untuk masuk kota',false);return}
+ try{
+  mpSession=mpSessionId();mpClient=window.supabase.createClient(MP.url,MP.anonKey);
+  mpChannel=mpClient.channel(MP.room,{config:{presence:{key:mpSession},broadcast:{self:false}}});
+  mpChannel.on('presence',{event:'sync'},mpPresenceSync);
+  mpChannel.on('broadcast',{event:'move'},function(msg){if(msg&&msg.payload)mpAddOrUpdate(msg.payload,msg.payload.sessionId)});
+  mpChannel.on('broadcast',{event:'chat'},function(msg){if(msg&&msg.payload)chatAppend(msg.payload.user,msg.payload.text,msg.payload.sessionId===mpSession)});
+  mpChannel.on('broadcast',{event:'build'},function(msg){if(msg&&msg.payload)addWorldBuild(msg.payload,false)});
+  mpChannel.subscribe(async function(status){
+   if(status==='SUBSCRIBED'){
+    var payload={sessionId:mpSession,user:me.user,warna:me.warna,acc:me.acc,x:T3.pos.x,z:T3.pos.z,rot:0};
+    await mpChannel.track(payload);mpStatus('🌐 Terhubung — 1 warga online',true);mpPresenceSync();
+    await loadWorldBuilds();
+   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){mpStatus('🌐 Koneksi multiplayer terputus',false)}
+  });
+ }catch(e){console.warn('Multiplayer:',e);mpStatus('🌐 Gagal terhubung ke server',false)}
+}
+function chatAppend(user,text,isMine){var log=$('chat-log');if(!log)return;var row=document.createElement('div');row.className='chatline';var b=document.createElement('b');b.textContent=(isMine?'Kamu':clean(user||'Warga',24))+': ';var span=document.createElement('span');span.textContent=String(text||'').slice(0,180);row.appendChild(b);row.appendChild(span);log.appendChild(row);while(log.children.length>60)log.removeChild(log.firstChild);log.scrollTop=log.scrollHeight}
+function sendChat(text){if(!mpChannel||!me){toast('Hubungkan multiplayer dan masuk dengan akun warga dulu.');return}var msg={user:me.user,text:String(text).trim().slice(0,180),sessionId:mpSession,at:Date.now()};if(!msg.text)return;chatAppend(msg.user,msg.text,true);mpChannel.send({type:'broadcast',event:'chat',payload:msg}).catch(function(){toast('Pesan gagal dikirim.')})}
+function mpSendPosition(t){
+ if(!mpChannel||!me||!mpChannel.send||t-mpLastSend<100)return;mpLastSend=t;
+ var payload={sessionId:mpSession,user:me.user,warna:me.warna,acc:me.acc,x:T3.pos.x,z:T3.pos.z,rot:ply?ply.rotation.y:0};
+ mpChannel.send({type:'broadcast',event:'move',payload:payload}).catch(function(){});
+}
 var GF=false,FORMURL='',EN={};
 (function(){try{if(!CFG.prefill||!CFG.sheetCsv)return;var u=new URL(CFG.prefill);FORMURL=u.origin+u.pathname.replace(/\/viewform$/,'/formResponse');var map={AAA:'user',BBB:'prof',CCC:'warna',DDD:'acc',EEE:'uid'};u.searchParams.forEach(function(v,k){if(map[v])EN[map[v]]=k});GF=!!(EN.user&&EN.prof&&EN.warna&&EN.acc&&EN.uid)}catch(e){GF=false}})();
 function parseCSV(t){var rows=[],r=[],f='',q=false,i,c;for(i=0;i<t.length;i++){c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===','){r.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;r.push(f);f='';rows.push(r);r=[]}else f+=c}if(f!==''||r.length){r.push(f);rows.push(r)}return rows}
@@ -284,7 +356,7 @@ $('form').addEventListener('submit',function(e){
  var myid=(me&&me.uid)||('l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
  // Simpan lokal lebih dahulu supaya pendaftaran tetap berjalan tanpa koneksi database.
  me=Object.assign({uid:myid,shared:false,seen:me?me.seen:false},rec);save();editing=false;btn.disabled=false;
- refreshAll();showState();window.scrollTo(0,0);
+ refreshAll();showState();if(!mpChannel)initMultiplayer();window.scrollTo(0,0);
  // Sinkronisasi online dilakukan di belakang layar, tanpa mengunci tombol daftar.
  if(DB&&UID){DB.collection('warga').doc(UID).set(rec).then(function(){me.uid=UID;me.shared=true;save();refreshAll()}).catch(function(){toast('Kartu tersimpan di perangkat ini, tetapi sinkronisasi online gagal.')})}
  else if(GF){sendGF(rec,myid).then(function(){me.shared=true;save();showState();setTimeout(loadSheet,5000)}).catch(function(){toast('Kartu tersimpan di perangkat ini, tetapi sinkronisasi online gagal.')})}
@@ -369,7 +441,9 @@ $('d-map').onclick=function(){$('dlg').close();go('jelajah');setTimeout(function
 $('dlg').addEventListener('click',function(e){if(e.target===this)this.close()});
 var chipMe=document.createElement('button');chipMe.type='button';chipMe.className='chip';chipMe.textContent='Rumahku';chipMe.onclick=function(){var m=mine();if(m){state.day=4;syncSeg();selectLM('w'+m.id,true)}};$('legend').insertBefore(chipMe,$('legend').firstChild);
 // ===== kota 3D =====
-var T=window.THREE,T3={on:false,mode:true,ok:false,keys:{},jx:0,jy:0,jump:0,jv:0,pos:{x:0,z:0},pts:[],zmax:400},sc,cam,rd,world,ply,mats={};
+var T=window.THREE,T3={on:false,mode:true,ok:false,keys:{},jx:0,jy:0,jump:0,jv:0,pos:{x:0,z:0},pts:[],zmax:400,anim:'idle',speed:1},sc,cam,rd,world,ply,mats={};
+var soundOn=true,audioCtx=null,lastStepSound=0;
+function sfx(kind){if(!soundOn)return;try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume();var o=audioCtx.createOscillator(),g=audioCtx.createGain(),now=audioCtx.currentTime,notes={jump:[520,.13],land:[170,.09],wave:[660,.12],dance:[440,.18],cheer:[790,.2],click:[330,.07],step:[120,.035]};var n=notes[kind]||notes.click;o.type=kind==='step'?'triangle':'sine';o.frequency.setValueAtTime(n[0],now);if(kind==='jump'||kind==='cheer')o.frequency.exponentialRampToValueAtTime(n[0]*1.45,now+n[1]);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.12,now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+n[1]);o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+n[1]+.02)}catch(e){}}
 var LP={markas:[0,-16],roket:[-18,-8],sawit:[32,-12],kopdes:[22,-4],avengers:[-38,-24],bandara:[46,26],minimarket:[-24,14],pos:[-24,26],tenda:[-48,-8]},LN={markas:'Markas',roket:'Roket Pertama',sawit:'Kebun Sawit',kopdes:'Kopdes',avengers:'Gedung Avengers',bandara:'Bandara Mini',minimarket:'Minimarket',pos:'Pos Pajak',tenda:'Tenda Darurat'},LH={markas:9,roket:15,sawit:8,kopdes:7,avengers:27,bandara:8,minimarket:8,pos:7,tenda:6};
 var GB,GC,GS,GP,GE;if(T){GB=new T.BoxGeometry(1,1,1);GC=new T.CylinderGeometry(.9,.9,2.2,12);GS=new T.SphereGeometry(.9,12,8);GP=new T.ConeGeometry(1,1,4);GE=new T.SphereGeometry(.4,8,6)}
 function M(c){return mats[c]||(mats[c]=new T.MeshLambertMaterial({color:c}))}
@@ -382,6 +456,12 @@ if(a===1)[-.4,0,.4].forEach(function(x){mesh(GC,'#23262b',x,4.2,0,g,.06,.4,.06)}
 if(a===2)mesh(GP,'#ff7eb6',0,4.8,0,g,.9,1.7,.9);
 if(a===3)mesh(GP,'#fff1c9',.4,4.4,0,g,.3,1,.3);return g}
 function lab(t,col){var c=document.createElement('canvas');c.width=320;c.height=72;var x=c.getContext('2d');x.fillStyle=col||'rgba(29,43,79,.88)';x.beginPath();if(x.roundRect)x.roundRect(4,4,312,64,22);else x.rect(4,4,312,64);x.fill();x.fillStyle='#fff';x.font='600 30px Fredoka,Trebuchet MS,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(t.length>18?t.slice(0,17)+'…':t,160,38);var s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),transparent:true}));s.scale.set(8,1.8,1);return s}
+function drawRoad(b){if(!world||!T)return;var g=new T.Group();var x=clamp(+b.x||0,-85,85),z=clamp(+b.z||0,-50,145),len=clamp(+b.length||18,6,60),wid=clamp(+b.width||5,3,10);var y=hillAt(x,z)+.12;var road=new T.Mesh(new T.BoxGeometry(wid,.18,len),M('#62564f'));road.position.set(x,y,z);g.add(road);for(var side of [-1,1]){var edge=new T.Mesh(new T.BoxGeometry(.18,.2,len),M('#d9b58d'));edge.position.set(x+side*(wid/2-.2),y+.08,z);g.add(edge)}world.add(g);roadMeshes.push(g)}
+function hillAt(x,z){return 0.4+Math.max(0,Math.sin(x*.09+1)*Math.cos(z*.1)*.5+.5)*1.5}
+function renderWorldBuilds(){roadMeshes.forEach(function(g){if(world)world.remove(g)});roadMeshes=[];worldBuilds.forEach(drawRoad)}
+function addWorldBuild(b,persist){if(!b||!b.id||worldBuilds.some(function(x){return x.id===b.id}))return;worldBuilds.push(b);if(world)drawRoad(b);if(persist&&mpClient){mpClient.from('world_builds').insert({id:b.id,kind:'road',x:b.x,z:b.z,length:b.length,width:b.width,created_by:b.created_by}).then(function(r){if(r.error){console.warn(r.error);toast('Jalan tampil sementara, tetapi gagal disimpan ke database. Periksa tabel world_builds.')}});if(mpChannel)mpChannel.send({type:'broadcast',event:'build',payload:b})}}
+async function loadWorldBuilds(){if(!mpClient)return;try{var r=await mpClient.from('world_builds').select('id,kind,x,z,length,width,created_by').eq('kind','road').limit(500);if(r.error)throw r.error;worldBuilds=r.data||[];if(world)renderWorldBuilds()}catch(e){console.warn('Gagal memuat bangunan bersama:',e);toast('Belum bisa memuat jalan bersama. Jalankan SQL setup di bawah.')}}
+function buildRoadHere(){if(!mpChannel||!me){toast('Hubungkan multiplayer untuk membangun bersama.');return}var b={id:mpSession+'-'+Date.now(),kind:'road',x:Math.round(T3.pos.x),z:Math.round(T3.pos.z-12),length:18,width:5,created_by:me.user};addWorldBuild(b,true);toast('Jalan ditambahkan ke Mars City!')}
 function build3D(){if(!T||!sc)return;var sig=WARGA.map(function(w){return w.user+'|'+w.prof+'|'+w.warna+w.acc}).join(',')+(me?me.user+me.warna+'-'+me.acc:'');if(sig===T3.sig)return;T3.sig=sig;
 if(world){sc.remove(world);world.traverse(function(o){if(o.geometry&&o.geometry.dispose)o.geometry.dispose();if(o.material&&o.material.map)o.material.map.dispose()})}
 world=new T.Group();sc.add(world);T3.pts=[];T3.zmax=120;
@@ -423,16 +503,19 @@ var river=new T.Group();river.position.set(-17,.18,8);var water=new T.Mesh(new T
 var base=new T.Group();base.position.set(0,hill(0,-16),-16);bx(14,4,9,'#d7263d',0,2,0,base);var dome=new T.Mesh(new T.SphereGeometry(4.5,18,12,0,Math.PI*2,0,Math.PI/2),new T.MeshLambertMaterial({color:0x9fe6ff,transparent:true,opacity:.72}));dome.position.y=4;base.add(dome);world.add(base);labelAt('MARKAS MARS CITY',0,11,-16);T3.pts.push({x:0,z:-16,r:10,kind:'l',id:'markas'});
 // Decorative capsule people moving around the settlement
 T3.citizens=[];for(var ci=0;ci<Math.min(12,WARGA.length);ci++){var ww=WARGA[ci],npc=chr(ww.warna,ww.acc);npc.scale.setScalar(.55);npc.position.set((ci%4-1.5)*5,0,-32-Math.floor(ci/4)*7);world.add(npc);T3.citizens.push({o:npc,a:ci*.9,r:2.5+ci%3})}
-if(ply)sc.remove(ply);ply=chr(me?me.warna:0,me?me.acc:0);ply.scale.setScalar(.75);if(me){var pl=lab('@'+me.user,'#1b8f83');pl.position.y=6.6;ply.add(pl)}sc.add(ply)}
+renderWorldBuilds();renderEpisodeObjects();if(ply)sc.remove(ply);ply=chr(me?me.warna:0,me?me.acc:0);ply.scale.setScalar(.75);if(me){var pl=lab('@'+me.user,'#1b8f83');pl.position.y=6.6;ply.add(pl)}sc.add(ply)}
 function tp3D(id){var o=T3.pts.filter(function(p){return String(p.id)===String(id)})[0];if(!o)return;T3.pos.x=o.kind==='w'?(o.x>0?5.2:-5.2):o.x;T3.pos.z=o.z+(o.kind==='w'?0:o.r*.8)}
 function hud(p){var h=$('hud3');if(!p){h.innerHTML='<b>Mars City</b>Jalan ke rumah warga atau bangunan untuk melihat ceritanya.';return}
 if(p.kind==='w'){var w=WARGA[p.id];h.innerHTML='<b>'+esc(w.user)+'</b>'+esc(w.prof)+(w.lencana?' • '+esc(w.lencana):'')+' • '+esc(w.no)}else{var m=LM.filter(function(x){return x.id===p.id})[0];h.innerHTML='<b>'+esc(m.n)+'</b>'+esc(m.t)}}
 function rsz(){if(!rd)return;var b=$('c3d');rd.setSize(b.clientWidth,b.clientHeight);cam.aspect=b.clientWidth/Math.max(1,b.clientHeight);cam.updateProjectionMatrix()}
 function loop(t){requestAnimationFrame(loop);if(!T3.on||$('v-jelajah').hidden||!rd)return;if(world&&T3.citizens){T3.citizens.forEach(function(n,i){var q=n.a+t*.00035;n.o.position.x=Math.cos(q)*n.r+(i%4-1.5)*5;n.o.position.z=-32-Math.floor(i/4)*7+Math.sin(q)*n.r;n.o.rotation.y=q+Math.PI/2;n.o.position.y=Math.abs(Math.sin(t*.003+i))*.12})}var dt=Math.min(.05,(t-(T3.t||t))/1000);T3.t=t;
 var k=T3.keys,dx=(k.arrowright||k.d?1:0)-(k.arrowleft||k.a?1:0)+T3.jx,dz=(k.arrowdown||k.s?1:0)-(k.arrowup||k.w?1:0)+T3.jy,l=Math.hypot(dx,dz),mv=l>.1;
-if(mv){if(l>1){dx/=l;dz/=l}T3.pos.x=clamp(T3.pos.x+dx*16*dt,-90,90);T3.pos.z=clamp(T3.pos.z+dz*16*dt,-60,T3.zmax+40);ply.rotation.y=Math.atan2(dx,dz);T3.walk=(T3.walk||0)+dt*12}
-if(T3.jump>0){T3.jump+=T3.jv*dt;T3.jv-=22*dt;if(T3.jump<=0){T3.jump=0;T3.jv=0}}
-var bob=mv?Math.abs(Math.sin(T3.walk))*.22:Math.sin(t*.002)*.035;ply.position.set(T3.pos.x,T3.jump+bob,T3.pos.z);if(ply.userData.limbs){ply.userData.limbs.forEach(function(a,i){a.rotation.z=mv?Math.sin(T3.walk+(i%2)*Math.PI)*.65:Math.sin(t*.002+i)*.035})}cam.position.set(T3.pos.x,16,T3.pos.z+20);cam.lookAt(T3.pos.x,2,T3.pos.z);
+if(mv){if(l>1){dx/=l;dz/=l}var run=(T3.anim==='run'||k.shift);var pace=(run?25:16)*T3.speed;T3.pos.x=clamp(T3.pos.x+dx*pace*dt,-90,90);T3.pos.z=clamp(T3.pos.z+dz*pace*dt,-60,T3.zmax+40);ply.rotation.y=Math.atan2(dx,dz);T3.walk=(T3.walk||0)+dt*(run?19:12)*T3.speed;if(t-lastStepSound>420){sfx('step');lastStepSound=t}}
+if(T3.jump>0){T3.jump+=T3.jv*dt;T3.jv-=22*dt;if(T3.jump<=0){T3.jump=0;T3.jv=0;sfx('land')}}
+var anim=T3.anim,phase=t*.004*T3.speed,bob=mv?Math.abs(Math.sin(T3.walk))*.22:Math.sin(t*.002)*.035;ply.position.set(T3.pos.x,T3.jump+bob+(anim==='dance'?Math.abs(Math.sin(phase*2))*.22:0),T3.pos.z);
+Object.keys(remotePlayers).forEach(function(id){var r=remotePlayers[id];r.o.position.x+=(r.tx-r.o.position.x)*.28;r.o.position.z+=(r.tz-r.o.position.z)*.28;r.o.rotation.y=r.rot;r.o.position.y=Math.abs(Math.sin(t*.003+id.length))*.08;if(r.o.userData.limbs){r.o.userData.limbs.forEach(function(a,i){a.rotation.z=Math.sin(t*.006+i*Math.PI)*.18})}});
+mpSendPosition(t);
+if(ply.userData.limbs){ply.userData.limbs.forEach(function(a,i){var side=i%2===0?1:-1,arm=i%2===0;var swing=mv?Math.sin(T3.walk+(i%2)*Math.PI)*.65:Math.sin(t*.002+i)*.035;if(anim==='wave'&&i===0)swing=Math.sin(phase*2.5)*1.05;if(anim==='dance')swing=Math.sin(phase*2+i*Math.PI)*.95;if(anim==='cheer'&&arm)swing=-.95+Math.sin(phase*2)*.18;if(anim==='run')swing=Math.sin(T3.walk+(i%2)*Math.PI)*.95;a.rotation.z=swing})}cam.position.set(T3.pos.x,16,T3.pos.z+20);cam.lookAt(T3.pos.x,2,T3.pos.z);
 var best=null,bd=1e9;T3.pts.forEach(function(p){var d=Math.hypot(p.x-T3.pos.x,p.z-T3.pos.z)-p.r;if(d<bd){bd=d;best=p}});var key=bd<4?best.id:'';if(key!==T3.near){T3.near=key;hud(bd<4?best:null)}
 rd.render(sc,cam)}
 function init3D(){if(!T)return false;if(T3.ok)return true;try{rd=new T.WebGLRenderer({antialias:true});rd.setPixelRatio(Math.min(devicePixelRatio||1,2));$('c3d').appendChild(rd.domElement);sc=new T.Scene();sc.background=new T.Color(0xf0b48a);sc.fog=new T.Fog(0xf0b48a,60,170);cam=new T.PerspectiveCamera(50,1,.5,400);sc.add(new T.HemisphereLight(0xffe9d6,0x7d3320,.9));var dl=new T.DirectionalLight(0xffffff,.55);dl.position.set(20,40,10);sc.add(dl);T3.ok=true;rsz();build3D();var m=mine();if(m)tp3D(m.id);requestAnimationFrame(loop)}catch(e){T3.ok=false}return T3.ok}
@@ -441,14 +524,50 @@ $('b-mode').onclick=function(){T3.mode=!T3.mode;show3D();if(!T3.mode)renderMap()
 $('b-home').onclick=function(){var m=mine();if(m)tp3D(m.id)};
 LM.forEach(function(m){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=LN[m.id];b.onclick=function(){tp3D(m.id)};$('legend3').appendChild(b)});
 addEventListener('keydown',function(e){if(!T3.on||$('v-jelajah').hidden||/INPUT|TEXTAREA/.test(e.target.tagName))return;T3.keys[e.key.toLowerCase()]=true;if(e.key.indexOf('Arrow')===0)e.preventDefault()});
-addEventListener('keyup',function(e){delete T3.keys[e.key.toLowerCase()]});addEventListener('blur',function(){T3.keys={}});addEventListener('resize',rsz);
+addEventListener('keyup',function(e){delete T3.keys[e.key.toLowerCase()]});addEventListener('blur',function(){T3.keys={}});addEventListener('resize',rsz);addEventListener('beforeunload',function(){if(mpChannel)mpChannel.unsubscribe()});
 var joy=$('joy'),kn=$('knob');function jm(e){var r=joy.getBoundingClientRect(),x=(e.clientX-r.left-55)/45,y=(e.clientY-r.top-55)/45,l=Math.hypot(x,y);if(l>1){x/=l;y/=l}T3.jx=x;T3.jy=y;kn.style.transform='translate('+x*30+'px,'+y*30+'px)'}
 function jend(){T3.jx=T3.jy=0;kn.style.transform=''}
 joy.addEventListener('pointerdown',function(e){joy.setPointerCapture(e.pointerId);jm(e)});joy.addEventListener('pointermove',function(e){if(e.buttons)jm(e)});joy.addEventListener('pointerup',jend);joy.addEventListener('pointercancel',jend);
-function jumpStart(){if(T3.jump===0){T3.jv=8.5;T3.jump=.01}}
+function jumpStart(){if(T3.jump===0){T3.jv=8.5;T3.jump=.01;sfx('jump')}}
 $('b-jump').addEventListener('pointerdown',function(e){e.preventDefault();jumpStart()});
-$('b-full').onclick=function(){var el=$('w3d').querySelector('.stage');if(!document.fullscreenElement){if(el.requestFullscreen)el.requestFullscreen().then(rsz).catch(function(){toast('Mode layar penuh tidak tersedia di browser ini.')})}else if(document.exitFullscreen)document.exitFullscreen()};
-document.addEventListener('fullscreenchange',function(){ $('b-full').textContent=document.fullscreenElement?'✕ KELUAR':'⛶ LAYAR';setTimeout(rsz,100)});
+$('b-full').onclick=function(){var el=$('w3d').querySelector('.stage');if(!document.fullscreenElement){if(el.requestFullscreen)el.requestFullscreen().then(function(){rsz();if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){})}).catch(function(){toast('Mode layar penuh tidak tersedia di browser ini.')})}else if(document.exitFullscreen)document.exitFullscreen()};
+document.addEventListener('fullscreenchange',function(){ $('b-full').textContent=document.fullscreenElement?'✕ KELUAR':'⛶ LAYAR';if(!document.fullscreenElement&&screen.orientation&&screen.orientation.unlock)try{screen.orientation.unlock()}catch(e){}setTimeout(rsz,100)});
+$('b-build-road').onclick=buildRoadHere;$('b-build-clear').onclick=function(){toast('Jalan yang sudah disimpan adalah bagian kota bersama dan tidak dihapus dari sini.')};
+$('chat-form').addEventListener('submit',function(e){e.preventDefault();var input=$('chat-input');sendChat(input.value);input.value=''});
+$('b-sound').onclick=function(){soundOn=!soundOn;this.textContent=soundOn?'🔊 Suara aktif':'🔇 Suara mati';this.setAttribute('aria-pressed',String(soundOn));if(soundOn)sfx('click')};
+[].forEach.call(document.querySelectorAll('[data-anim]'),function(b){b.onclick=function(){T3.anim=b.dataset.anim;[].forEach.call(document.querySelectorAll('[data-anim]'),function(x){x.setAttribute('aria-pressed',String(x===b))});sfx(T3.anim==='wave'?'wave':T3.anim==='dance'?'dance':T3.anim==='cheer'?'cheer':'click');toast('Animasi: '+b.textContent)}});
+$('anim-speed').oninput=function(){T3.speed=+this.value;$('speed-val').textContent=T3.speed.toFixed(1)+'×'};
+
+// ===== EPISODE WORLD UPDATE =====
+function episodeValidate(data){
+ if(!data||typeof data!=='object'||!Array.isArray(data.objects))throw new Error('JSON harus memiliki array "objects".');
+ if(data.objects.length>100)throw new Error('Maksimal 100 objek dalam satu file episode.');
+ var allowed=['road','house','tree','building','rocket','plaza'];
+ var seen={};data.objects.forEach(function(o,i){if(!o||typeof o!=='object')throw new Error('Objek ke-'+(i+1)+' tidak valid.');
+  if(!o.id||seen[o.id])throw new Error('Setiap objek wajib punya ID unik.');seen[o.id]=1;
+  if(allowed.indexOf(o.type)<0)throw new Error('Jenis objek tidak didukung: '+o.type);
+  ['x','z'].forEach(function(k){if(!Number.isFinite(Number(o[k]))||Math.abs(Number(o[k]))>180)throw new Error('Koordinat '+k+' tidak valid pada '+o.id)});
+ });return {episode:Math.max(1,Math.floor(Number(data.episode)||5)),title:clean(data.title||('Mars City Day '+(Number(data.episode)||5)),60),objects:data.objects.map(function(o){return Object.assign({},o,{id:String(o.id),name:clean(o.name||o.type,40),x:Number(o.x),z:Number(o.z)})})};
+}
+function clearEpisodeMeshes(){episodeMeshes.forEach(function(g){if(world)world.remove(g)});episodeMeshes=[]}
+function renderEpisodeObjects(){if(!world||!T)return;clearEpisodeMeshes();(episodeWorld.objects||[]).forEach(function(o){var g=new T.Group(),x=o.x,z=o.z,y=hillAt(x,z),c=o.color||'#d7c4a5';
+  if(o.type==='road'){var len=clamp(+o.length||24,6,100),wid=clamp(+o.width||5,3,16);var m=new T.Mesh(new T.BoxGeometry(wid,.2,len),M(c));m.position.set(x,y+.12,z);g.add(m);[-1,1].forEach(function(q){var line=new T.Mesh(new T.BoxGeometry(.12,.22,len),M('#ead6ae'));line.position.set(x+q*(wid/2-.2),y+.23,z);g.add(line)})}
+  else if(o.type==='house'){bx(6,3.5,5,c,0,1.75,0,g);var roof=new T.Mesh(new T.ConeGeometry(4.6,2.3,4),M(o.roofColor||'#bd5438'));roof.position.y=4.5;roof.rotation.y=Math.PI/4;g.add(roof);bx(1,1.8,.14,'#68452e',0,.9,2.56,g)}
+  else if(o.type==='tree'){mesh(new T.CylinderGeometry(.22,.3,3.5,8),'#70482d',0,1.75,0,g);for(var i=0;i<6;i++){var leaf=bx(3,.14,.7,o.leafColor||'#3fae5a',1.2,3.2,0,g);leaf.rotation.y=i*Math.PI/3;leaf.rotation.z=-.22}}
+  else if(o.type==='building'){var h=clamp(+o.height||9,3,35),w=clamp(+o.width||8,3,24),d=clamp(+o.depth||7,3,24);bx(w,h,d,c,0,h/2,0,g);for(var fy=2;fy<h;fy+=2.5)bx(w+.08,.16,d+.08,o.windowColor||'#9fe6ff',0,fy,0,g)}
+  else if(o.type==='rocket'){mesh(new T.CylinderGeometry(.9,1.1,5,12),c,0,3,0,g);var nose=new T.Mesh(new T.ConeGeometry(1,2,12),M(o.roofColor||'#d7263d'));nose.position.y=6.5;g.add(nose);[-1,1].forEach(function(q){bx(.3,1.6,1.1,o.roofColor||'#d7263d',q*1.05,1,0,g)})}
+  else if(o.type==='plaza'){var pad=new T.Mesh(new T.CylinderGeometry(clamp(+o.radius||8,3,25),clamp(+o.radius||8,3,25),.35,32),M(c));pad.position.y=.18;g.add(pad)}
+  g.position.set(x,y,z);g.rotation.y=Number(o.rotation)||0;world.add(g);if(o.name){var tag=lab(o.name);tag.position.set(x,y+(o.type==='building'?(+o.height||9)+2:7),z);world.add(tag);episodeMeshes.push(tag)}episodeMeshes.push(g);
+ });}
+function readEpisodeEditor(){var raw=$('episode-json').value;var data;try{data=JSON.parse(raw)}catch(e){throw new Error('JSON belum valid: '+e.message)}return episodeValidate(data)}
+function episodeMessage(t){$('episode-status').textContent=t}
+function previewEpisode(){try{var d=readEpisodeEditor();episodeMessage('Pratinjau siap: '+d.title+' • '+d.objects.length+' objek. Tekan Update Kota untuk menerapkan.')}catch(e){episodeMessage(e.message)}}
+function applyEpisode(){try{var d=readEpisodeEditor();episodeWorld=d;if(T3.ok&&world)renderEpisodeObjects();episodeMessage('Kota diperbarui di browser ini: '+d.title+' • '+d.objects.length+' objek. Unduh JSON lalu unggah ke GitHub agar semua pemain menerima pembaruan.');sfx('cheer')}catch(e){episodeMessage(e.message)}}
+function downloadEpisode(){try{var d=readEpisodeEditor(),blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='marscity-world.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000);episodeMessage('File marscity-world.json diunduh. Unggah file ini ke folder utama repositori GitHub marscity-3.')}catch(e){episodeMessage(e.message)}}
+$('b-episode-preview').onclick=previewEpisode;$('b-episode-apply').onclick=applyEpisode;$('b-episode-download').onclick=downloadEpisode;
+async function loadEpisodeManifest(){try{var r=await fetch('marscity-world.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)return;var d=episodeValidate(await r.json());episodeWorld=d;if(world)renderEpisodeObjects();episodeMessage('Dunia aktif: '+d.title+' • '+d.objects.length+' objek.')}catch(e){console.warn('Manifest kota belum dimuat:',e)}}
+loadEpisodeManifest();
+
 // ===== menu =====
 var VIEWS=['daftar','jelajah'];
 function go(v,push){if(VIEWS.indexOf(v)<0)v='daftar';if(v==='jelajah'&&!me){toast('Daftar dulu supaya bisa menjelajahi kota.');v='daftar'}
@@ -465,7 +584,7 @@ if(DB){try{DB.collection('warga').onSnapshot(function(sn){regs=sn.docs.map(funct
 if(me&&UID&&me.uid!==UID&&!me.shared){}refreshAll()},function(){})}catch(e){}}}
 $('logo').innerHTML=capsule(0,0,1);
 if(me){S={user:me.user,prof:me.prof,warna:me.warna,acc:me.acc,mata:1,plat:'Portal'};fill()}
-refreshAll();go(location.hash.slice(1),false);initShared();
+refreshAll();go(location.hash.slice(1),false);initShared();initMultiplayer();
 if(GF){loadSheet();setInterval(loadSheet,60000);if(me&&!me.shared){sendGF({user:me.user,prof:me.prof,warna:me.warna,acc:me.acc},me.uid).then(function(){me.shared=true;save();showState()}).catch(function(){})}}
 })();
 </script>
